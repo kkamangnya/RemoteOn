@@ -11,3 +11,4 @@
 - 2026-04-26 23:07:12 +09:00 - Moved the theme control into a small top-right switch in the app bar and removed the large hero toggle from the home card.
 - 2026-04-26 23:15:41 +09:00 - Added small sun and moon indicators beside the top-right theme switch so the light and dark modes are easier to recognize at a glance.
 - 2026-04-26 23:24:10 +09:00 - Added MAC address input formatting so hyphens are inserted automatically and the dialog now shows the example format directly.
+- 2026-04-26 23:35:52 +09:00 - Created a custom adaptive launcher icon for RemoteOn and linked the app manifest to the new icon assets.
