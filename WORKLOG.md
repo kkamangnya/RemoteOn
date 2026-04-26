@@ -7,3 +7,4 @@
 - 2026-04-26 22:25:21 +09:00 - Removed the leftover `app/build/outputs/apk` folder as part of the build cleanup so the workspace keeps only `app/build/outputs/install/RemoteOn.apk`.
 - 2026-04-26 22:37:35 +09:00 - Refreshed the Android UI with a more modern Material layout and verified the updated screen in the emulator.
 - 2026-04-26 22:49:45 +09:00 - Added dark/light/system theme selection and automatic broadcast address calculation from IP and subnet mask input.
+- 2026-04-26 22:58:39 +09:00 - Reworked the dark theme toward a Samsung One UI style and moved theme switching into a visible toggle on the home screen.

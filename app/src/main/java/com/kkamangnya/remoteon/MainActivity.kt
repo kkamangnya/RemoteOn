@@ -3,6 +3,8 @@ package com.kkamangnya.remoteon
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Toast
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatActivity
@@ -10,12 +12,11 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.kkamangnya.remoteon.databinding.ActivityMainBinding
 import com.kkamangnya.remoteon.databinding.DialogRemotePcBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import android.text.Editable
-import android.text.TextWatcher
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -30,22 +31,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.topAppBar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.actionTheme -> {
-                    showThemeDialog()
-                    true
-                }
-                else -> false
-            }
-        }
-
         adapter = RemotePcAdapter(
             onWake = viewModel::wakePc,
             onPing = viewModel::pingPc,
             onDelete = viewModel::deletePc,
             onEdit = { showPcDialog(it) }
         )
+
+        bindThemeToggle()
 
         binding.pcRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.pcRecyclerView.adapter = adapter
@@ -164,29 +157,23 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun showThemeDialog() {
-        val options = arrayOf(
-            getString(R.string.theme_system),
-            getString(R.string.theme_light),
-            getString(R.string.theme_dark)
-        )
-        val values = intArrayOf(
-            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-            AppCompatDelegate.MODE_NIGHT_NO,
-            AppCompatDelegate.MODE_NIGHT_YES
-        )
+    private fun bindThemeToggle() {
         val currentMode = ThemePrefs.loadNightMode(this)
-        val checkedIndex = values.indexOf(currentMode).takeIf { it >= 0 } ?: 0
-
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.theme_title)
-            .setSingleChoiceItems(options, checkedIndex) { dialog, which ->
-                val selectedMode = values[which]
-                ThemePrefs.saveNightMode(this, selectedMode)
-                AppCompatDelegate.setDefaultNightMode(selectedMode)
-                dialog.dismiss()
+        val checkedId = when (currentMode) {
+            AppCompatDelegate.MODE_NIGHT_NO -> binding.themeLightButton.id
+            AppCompatDelegate.MODE_NIGHT_YES -> binding.themeDarkButton.id
+            else -> binding.themeSystemButton.id
+        }
+        binding.themeToggleGroup.check(checkedId)
+        binding.themeToggleGroup.addOnButtonCheckedListener { _: MaterialButtonToggleGroup, buttonId: Int, isChecked: Boolean ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val selectedMode = when (buttonId) {
+                binding.themeLightButton.id -> AppCompatDelegate.MODE_NIGHT_NO
+                binding.themeDarkButton.id -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+            ThemePrefs.saveNightMode(this, selectedMode)
+            AppCompatDelegate.setDefaultNightMode(selectedMode)
+        }
     }
 }
