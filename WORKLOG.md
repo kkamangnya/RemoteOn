@@ -13,3 +13,4 @@
 - 2026-04-26 23:24:10 +09:00 - Added MAC address input formatting so hyphens are inserted automatically and the dialog now shows the example format directly.
 - 2026-04-26 23:35:52 +09:00 - Created a custom adaptive launcher icon for RemoteOn and linked the app manifest to the new icon assets.
 - 2026-04-26 23:39:25 +09:00 - Expanded online status checks to try multiple common Windows ports and ICMP ping so PCs that block RDP no longer look offline too easily.
+- 2026-04-26 23:49:48 +09:00 - Made ping results report which probe succeeded or failed so online status now shows a clearer LAN reachability signal instead of a plain offline label.

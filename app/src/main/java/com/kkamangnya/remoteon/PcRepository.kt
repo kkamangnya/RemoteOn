@@ -34,8 +34,7 @@ class PcRepository(private val store: PcStore) {
         macAddress = pc.macAddress
     )
 
-    suspend fun checkOnline(pc: RemotePc): ConnectionState {
-        val online = HostStatusChecker.isOnline(pc.ipAddress)
-        return if (online) ConnectionState.Online else ConnectionState.Offline
+    suspend fun checkOnline(pc: RemotePc): HostStatusResult {
+        return HostStatusChecker.check(pc.ipAddress)
     }
 }

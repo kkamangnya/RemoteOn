@@ -58,22 +58,31 @@ class MainViewModel(private val repository: PcRepository) : ViewModel() {
 
     fun pingPc(pc: RemotePc) {
         viewModelScope.launch {
-            val state = repository.checkOnline(pc)
+            val result = repository.checkOnline(pc)
             val checkedAt = System.currentTimeMillis()
             _uiState.update { current ->
                 current.copy(
                     pcs = current.pcs.map {
-                        if (it.id == pc.id) it.copy(connectionState = state, lastCheckedAt = checkedAt) else it
+                        if (it.id == pc.id) {
+                            it.copy(
+                                connectionState = if (result.isOnline) ConnectionState.Online else ConnectionState.Offline,
+                                lastCheckedAt = checkedAt
+                            )
+                        } else {
+                            it
+                        }
                     }
                 )
             }
-            val message = when (state) {
-                ConnectionState.Online -> "${pc.name}은 온라인입니다."
-                ConnectionState.Offline -> "${pc.name}은 오프라인입니다."
-                ConnectionState.Unknown -> "${pc.name} 상태를 확인할 수 없습니다."
+
+            val message = if (result.isOnline) {
+                val method = result.method?.let { " ($it)" }.orEmpty()
+                "${pc.name}은(는) 온라인입니다$method."
+            } else {
+                val detail = result.detail?.let { " - $it" }.orEmpty()
+                "${pc.name}은(는) 오프라인입니다$detail."
             }
             _events.emit(message)
         }
     }
 }
-

@@ -53,32 +53,35 @@ object WakeOnLanSender {
     }
 }
 
+data class HostStatusResult(
+    val isOnline: Boolean,
+    val method: String? = null,
+    val detail: String? = null
+)
+
 object HostStatusChecker {
-    private val DEFAULT_PROBE_PORTS = intArrayOf(3389, 445, 135, 80, 22)
-    private const val CONNECT_TIMEOUT_MS = 800
+    private val DEFAULT_PROBE_PORTS = intArrayOf(445, 135, 3389, 80, 22)
+    private const val CONNECT_TIMEOUT_MS = 1200
+    private const val REACHABLE_TIMEOUT_MS = 1500
     private const val PING_TIMEOUT_MS = 1800L
 
-    suspend fun isOnline(ipAddress: String): Boolean = withContext(Dispatchers.IO) {
-        if (tryTcpProbe(ipAddress)) return@withContext true
-        if (tryIcmpPing(ipAddress)) return@withContext true
-        false
+    suspend fun check(ipAddress: String): HostStatusResult = withContext(Dispatchers.IO) {
+        tryIcmpReachable(ipAddress)?.let { return@withContext it }
+        trySystemPing(ipAddress)?.let { return@withContext it }
+        tryTcpProbe(ipAddress)?.let { return@withContext it }
+        HostStatusResult(false, detail = "ICMP, ping command, and TCP probes all failed.")
     }
 
-    private fun tryTcpProbe(ipAddress: String): Boolean {
-        for (port in DEFAULT_PROBE_PORTS) {
-            try {
-                Socket().use { socket ->
-                    socket.connect(InetSocketAddress(ipAddress, port), CONNECT_TIMEOUT_MS)
-                }
-                return true
-            } catch (_: IOException) {
-                // Try the next common Windows/LAN service port.
-            }
+    private fun tryIcmpReachable(ipAddress: String): HostStatusResult? {
+        return try {
+            val reachable = InetAddress.getByName(ipAddress).isReachable(REACHABLE_TIMEOUT_MS)
+            if (reachable) HostStatusResult(true, method = "ICMP", detail = "InetAddress.isReachable") else null
+        } catch (_: IOException) {
+            null
         }
-        return false
     }
 
-    private fun tryIcmpPing(ipAddress: String): Boolean {
+    private fun trySystemPing(ipAddress: String): HostStatusResult? {
         val commands = listOf(
             arrayOf("/system/bin/ping", "-c", "1", "-W", "1", ipAddress),
             arrayOf("ping", "-c", "1", "-W", "1", ipAddress),
@@ -96,14 +99,30 @@ object HostStatusChecker {
                     process.destroyForcibly()
                     continue
                 }
-                if (process.exitValue() == 0) return true
+                if (process.exitValue() == 0) {
+                    return HostStatusResult(true, method = "PING", detail = command.joinToString(" "))
+                }
             } catch (_: IOException) {
                 // Command not available on this device, keep trying.
             } catch (_: SecurityException) {
                 // Some Android builds restrict process execution, fall through.
             }
         }
-        return false
+        return null
+    }
+
+    private fun tryTcpProbe(ipAddress: String): HostStatusResult? {
+        for (port in DEFAULT_PROBE_PORTS) {
+            try {
+                Socket().use { socket ->
+                    socket.connect(InetSocketAddress(ipAddress, port), CONNECT_TIMEOUT_MS)
+                }
+                return HostStatusResult(true, method = "TCP", detail = "port $port")
+            } catch (_: IOException) {
+                // Try the next common Windows/LAN service port.
+            }
+        }
+        return null
     }
 }
 
