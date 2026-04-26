@@ -9,3 +9,4 @@
 - 2026-04-26 22:49:45 +09:00 - Added dark/light/system theme selection and automatic broadcast address calculation from IP and subnet mask input.
 - 2026-04-26 22:58:39 +09:00 - Reworked the dark theme toward a Samsung One UI style and moved theme switching into a visible toggle on the home screen.
 - 2026-04-26 23:07:12 +09:00 - Moved the theme control into a small top-right switch in the app bar and removed the large hero toggle from the home card.
+- 2026-04-26 23:15:41 +09:00 - Added small sun and moon indicators beside the top-right theme switch so the light and dark modes are easier to recognize at a glance.
