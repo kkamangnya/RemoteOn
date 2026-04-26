@@ -1,5 +1,6 @@
 package com.kkamangnya.remoteon
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -12,7 +13,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.button.MaterialButtonToggleGroup
 import com.kkamangnya.remoteon.databinding.ActivityMainBinding
 import com.kkamangnya.remoteon.databinding.DialogRemotePcBinding
 import kotlinx.coroutines.flow.collectLatest
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
             onEdit = { showPcDialog(it) }
         )
 
-        bindThemeToggle()
+        bindThemeSwitch()
 
         binding.pcRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.pcRecyclerView.adapter = adapter
@@ -157,23 +157,25 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun bindThemeToggle() {
+    private fun bindThemeSwitch() {
         val currentMode = ThemePrefs.loadNightMode(this)
-        val checkedId = when (currentMode) {
-            AppCompatDelegate.MODE_NIGHT_NO -> binding.themeLightButton.id
-            AppCompatDelegate.MODE_NIGHT_YES -> binding.themeDarkButton.id
-            else -> binding.themeSystemButton.id
+        binding.themeSwitch.isChecked = when (currentMode) {
+            AppCompatDelegate.MODE_NIGHT_YES -> true
+            AppCompatDelegate.MODE_NIGHT_NO -> false
+            else -> isSystemInNightMode()
         }
-        binding.themeToggleGroup.check(checkedId)
-        binding.themeToggleGroup.addOnButtonCheckedListener { _: MaterialButtonToggleGroup, buttonId: Int, isChecked: Boolean ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            val selectedMode = when (buttonId) {
-                binding.themeLightButton.id -> AppCompatDelegate.MODE_NIGHT_NO
-                binding.themeDarkButton.id -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        binding.themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val selectedMode = if (isChecked) {
+                AppCompatDelegate.MODE_NIGHT_YES
+            } else {
+                AppCompatDelegate.MODE_NIGHT_NO
             }
             ThemePrefs.saveNightMode(this, selectedMode)
             AppCompatDelegate.setDefaultNightMode(selectedMode)
         }
+    }
+
+    private fun isSystemInNightMode(): Boolean {
+        return (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
     }
 }
