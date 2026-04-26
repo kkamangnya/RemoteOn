@@ -2,10 +2,10 @@ package com.kkamangnya.remoteon
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.widget.Toast
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatActivity
@@ -64,17 +64,31 @@ class MainActivity : AppCompatActivity() {
     private fun showPcDialog(pc: RemotePc? = null) {
         val dialogBinding = DialogRemotePcBinding.inflate(LayoutInflater.from(this))
         dialogBinding.nameInput.setText(pc?.name.orEmpty())
-        dialogBinding.macInput.setText(pc?.macAddress.orEmpty())
+        dialogBinding.macInput.setText(formatMacAddress(pc?.macAddress.orEmpty()))
         dialogBinding.ipInput.setText(pc?.ipAddress.orEmpty())
         dialogBinding.subnetInput.setText(pc?.subnetMask.orEmpty())
         dialogBinding.broadcastInput.setText(pc?.broadcastAddress.orEmpty())
 
+        var selfUpdatingMac = false
+        dialogBinding.macInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                if (selfUpdatingMac) return
+                val raw = s?.toString().orEmpty()
+                val formatted = formatMacAddress(raw)
+                if (formatted == raw) return
+                selfUpdatingMac = true
+                dialogBinding.macInput.setText(formatted)
+                dialogBinding.macInput.setSelection(formatted.length)
+                selfUpdatingMac = false
+            }
+        })
+
         var selfUpdatingBroadcast = false
         val autoBroadcastUpdater = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-
             override fun afterTextChanged(s: Editable?) {
                 if (selfUpdatingBroadcast) return
                 val ip = dialogBinding.ipInput.text?.toString().orEmpty()
@@ -90,6 +104,7 @@ class MainActivity : AppCompatActivity() {
         }
         dialogBinding.ipInput.addTextChangedListener(autoBroadcastUpdater)
         dialogBinding.subnetInput.addTextChangedListener(autoBroadcastUpdater)
+
         val initialBroadcast = NetworkTools.calculateBroadcastAddress(
             dialogBinding.ipInput.text?.toString().orEmpty(),
             dialogBinding.subnetInput.text?.toString().orEmpty()
@@ -118,8 +133,8 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                val normalizedMac = mac.replace(":", "").replace("-", "").replace(" ", "")
-                if (normalizedMac.length != 12 || normalizedMac.any { it !in "0123456789abcdefABCDEF" }) {
+                val normalizedMac = normalizeMacAddress(mac)
+                if (normalizedMac.length != 12 || normalizedMac.any { it !in "0123456789ABCDEF" }) {
                     Toast.makeText(this, "MAC 주소 형식이 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
@@ -140,15 +155,21 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
+                val formattedMac = formatMacAddress(normalizedMac)
                 viewModel.savePc(
-                    (pc ?: RemotePc(name = name, macAddress = mac, ipAddress = ip, subnetMask = subnet, broadcastAddress = computedBroadcast))
-                        .copy(
-                            name = name,
-                            macAddress = mac,
-                            ipAddress = ip,
-                            subnetMask = subnet,
-                            broadcastAddress = computedBroadcast
-                        )
+                    (pc ?: RemotePc(
+                        name = name,
+                        macAddress = formattedMac,
+                        ipAddress = ip,
+                        subnetMask = subnet,
+                        broadcastAddress = computedBroadcast
+                    )).copy(
+                        name = name,
+                        macAddress = formattedMac,
+                        ipAddress = ip,
+                        subnetMask = subnet,
+                        broadcastAddress = computedBroadcast
+                    )
                 )
                 dialog.dismiss()
             }
@@ -177,5 +198,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun isSystemInNightMode(): Boolean {
         return (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    }
+
+    private fun normalizeMacAddress(value: String): String {
+        return value.replace(":", "")
+            .replace("-", "")
+            .replace(" ", "")
+            .uppercase()
+    }
+
+    private fun formatMacAddress(value: String): String {
+        val normalized = normalizeMacAddress(value)
+        if (normalized.isBlank()) return ""
+        return normalized.chunked(2).take(6).joinToString("-")
     }
 }
