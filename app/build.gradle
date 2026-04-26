@@ -29,6 +29,21 @@ android {
     }
 }
 
+android.applicationVariants.all { variant ->
+    if (variant.buildType.name == 'debug') {
+        variant.outputs.all {
+            outputFileName = 'RemoteOn.apk'
+        }
+    }
+}
+
+tasks.register('copyDebugApk', Copy) {
+    dependsOn 'assembleDebug'
+    from("$buildDir/outputs/apk/debug/RemoteOn.apk")
+    into("$buildDir/outputs/install")
+    rename { 'RemoteOn.apk' }
+}
+
 dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
@@ -40,4 +55,3 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.8.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
 }
-
