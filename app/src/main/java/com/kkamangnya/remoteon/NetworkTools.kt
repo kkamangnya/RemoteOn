@@ -68,3 +68,25 @@ object HostStatusChecker {
     }
 }
 
+object NetworkTools {
+    fun isValidIpv4(value: String): Boolean {
+        val octets = value.split(".")
+        if (octets.size != 4) return false
+        return octets.all { part ->
+            val number = part.toIntOrNull() ?: return false
+            number in 0..255
+        }
+    }
+
+    fun calculateBroadcastAddress(ipAddress: String, subnetMask: String): String? {
+        if (!isValidIpv4(ipAddress) || !isValidIpv4(subnetMask)) return null
+        val ipParts = ipAddress.split(".").map { it.toInt() }
+        val maskParts = subnetMask.split(".").map { it.toInt() }
+
+        val broadcastParts = ipParts.zip(maskParts).map { (ip, mask) ->
+            (ip or mask.inv()) and 0xFF
+        }
+
+        return broadcastParts.joinToString(".")
+    }
+}

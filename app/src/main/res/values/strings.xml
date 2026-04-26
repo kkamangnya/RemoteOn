@@ -8,4 +8,11 @@
     <string name="refresh">새로고침</string>
     <string name="loading">불러오는 중...</string>
     <string name="empty_state">아직 등록된 PC가 없습니다.</string>
+    <string name="subnet_mask">서브넷 마스크</string>
+    <string name="broadcast_auto_hint">IP와 서브넷 마스크를 입력하면 브로드캐스트 주소가 자동 계산됩니다.</string>
+    <string name="theme">테마</string>
+    <string name="theme_system">시스템</string>
+    <string name="theme_light">밝게</string>
+    <string name="theme_dark">어둡게</string>
+    <string name="theme_title">테마 선택</string>
 </resources>

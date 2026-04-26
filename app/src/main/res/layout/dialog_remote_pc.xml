@@ -56,6 +56,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:hint="@string/subnet_mask">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/subnetInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:hint="브로드캐스트 주소">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -64,6 +78,14 @@
                 android:layout_height="wrap_content"
                 android:inputType="textUri" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/broadcast_auto_hint"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/remoteon_on_surface_variant" />
     </LinearLayout>
 
 </ScrollView>

@@ -13,8 +13,8 @@ data class RemotePc(
     val name: String,
     val macAddress: String,
     val ipAddress: String,
+    val subnetMask: String = "",
     val broadcastAddress: String,
     val connectionState: ConnectionState = ConnectionState.Unknown,
     val lastCheckedAt: Long? = null
 )
-

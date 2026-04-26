@@ -39,4 +39,3 @@ class PcRepository(private val store: PcStore) {
         return if (online) ConnectionState.Online else ConnectionState.Offline
     }
 }
-

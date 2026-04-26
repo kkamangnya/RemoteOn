@@ -1,0 +1,13 @@
+<resources>
+    <color name="state_online">#40C98D</color>
+    <color name="state_offline">#9CA3AF</color>
+    <color name="state_unknown">#F0A84E</color>
+    <color name="remoteon_primary">#5BCFC6</color>
+    <color name="remoteon_primary_dark">#0B4E49</color>
+    <color name="remoteon_primary_container">#123E40</color>
+    <color name="remoteon_secondary_container">#1B2534</color>
+    <color name="remoteon_surface">#0F141A</color>
+    <color name="remoteon_surface_variant">#202833</color>
+    <color name="remoteon_on_surface">#E5E7EB</color>
+    <color name="remoteon_on_surface_variant">#B4BCC8</color>
+</resources>

@@ -26,6 +26,7 @@ class PcStore(
                             name = item.getString("name"),
                             macAddress = item.getString("macAddress"),
                             ipAddress = item.getString("ipAddress"),
+                            subnetMask = item.optString("subnetMask", ""),
                             broadcastAddress = item.getString("broadcastAddress")
                         )
                     )
@@ -43,6 +44,7 @@ class PcStore(
                         .put("name", pc.name)
                         .put("macAddress", pc.macAddress)
                         .put("ipAddress", pc.ipAddress)
+                        .put("subnetMask", pc.subnetMask)
                         .put("broadcastAddress", pc.broadcastAddress)
                 )
             }
@@ -57,4 +59,3 @@ class PcStore(
         private const val KEY_PCS = "pcs"
     }
 }
-
