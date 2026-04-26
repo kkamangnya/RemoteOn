@@ -8,6 +8,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.util.concurrent.TimeUnit
 
 object WakeOnLanSender {
     private const val WOL_PORT = 9
@@ -53,18 +54,56 @@ object WakeOnLanSender {
 }
 
 object HostStatusChecker {
-    private const val DEFAULT_PROBE_PORT = 3389
+    private val DEFAULT_PROBE_PORTS = intArrayOf(3389, 445, 135, 80, 22)
     private const val CONNECT_TIMEOUT_MS = 800
+    private const val PING_TIMEOUT_MS = 1800L
 
-    suspend fun isOnline(ipAddress: String, port: Int = DEFAULT_PROBE_PORT): Boolean = withContext(Dispatchers.IO) {
-        try {
-            Socket().use { socket ->
-                socket.connect(InetSocketAddress(ipAddress, port), CONNECT_TIMEOUT_MS)
+    suspend fun isOnline(ipAddress: String): Boolean = withContext(Dispatchers.IO) {
+        if (tryTcpProbe(ipAddress)) return@withContext true
+        if (tryIcmpPing(ipAddress)) return@withContext true
+        false
+    }
+
+    private fun tryTcpProbe(ipAddress: String): Boolean {
+        for (port in DEFAULT_PROBE_PORTS) {
+            try {
+                Socket().use { socket ->
+                    socket.connect(InetSocketAddress(ipAddress, port), CONNECT_TIMEOUT_MS)
+                }
+                return true
+            } catch (_: IOException) {
+                // Try the next common Windows/LAN service port.
             }
-            true
-        } catch (_: IOException) {
-            false
         }
+        return false
+    }
+
+    private fun tryIcmpPing(ipAddress: String): Boolean {
+        val commands = listOf(
+            arrayOf("/system/bin/ping", "-c", "1", "-W", "1", ipAddress),
+            arrayOf("ping", "-c", "1", "-W", "1", ipAddress),
+            arrayOf("/system/bin/ping", "-c", "1", ipAddress),
+            arrayOf("ping", "-c", "1", ipAddress)
+        )
+
+        for (command in commands) {
+            try {
+                val process = ProcessBuilder(*command)
+                    .redirectErrorStream(true)
+                    .start()
+                val finished = process.waitFor(PING_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                if (!finished) {
+                    process.destroyForcibly()
+                    continue
+                }
+                if (process.exitValue() == 0) return true
+            } catch (_: IOException) {
+                // Command not available on this device, keep trying.
+            } catch (_: SecurityException) {
+                // Some Android builds restrict process execution, fall through.
+            }
+        }
+        return false
     }
 }
 
