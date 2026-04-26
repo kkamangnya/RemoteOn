@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kkamangnya.remoteon.databinding.ActivityMainBinding
 import com.kkamangnya.remoteon.databinding.DialogRemotePcBinding
 import kotlinx.coroutines.flow.collectLatest
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         dialogBinding.ipInput.setText(pc?.ipAddress.orEmpty())
         dialogBinding.broadcastInput.setText(pc?.broadcastAddress.orEmpty())
 
-        val dialog = AlertDialog.Builder(this)
+        val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(if (pc == null) "PC 추가" else "PC 수정")
             .setView(dialogBinding.root)
             .setPositiveButton("저장", null)
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             .create()
 
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val name = dialogBinding.nameInput.text?.toString()?.trim().orEmpty()
                 val mac = dialogBinding.macInput.text?.toString()?.trim().orEmpty()
                 val ip = dialogBinding.ipInput.text?.toString()?.trim().orEmpty()

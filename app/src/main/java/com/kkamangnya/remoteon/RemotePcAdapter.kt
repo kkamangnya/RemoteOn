@@ -3,13 +3,14 @@ package com.kkamangnya.remoteon
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
+import android.content.res.ColorStateList
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
 
 class RemotePcAdapter(
     private val onWake: (RemotePc) -> Unit,
@@ -33,11 +34,10 @@ class RemotePcAdapter(
         private val macText: TextView = itemView.findViewById(R.id.pcMacText)
         private val ipText: TextView = itemView.findViewById(R.id.pcIpText)
         private val broadcastText: TextView = itemView.findViewById(R.id.pcBroadcastText)
-        private val statusText: TextView = itemView.findViewById(R.id.pcStatusText)
-        private val statusDot: ImageView = itemView.findViewById(R.id.pcStatusDot)
-        private val wakeButton: Button = itemView.findViewById(R.id.wakeButton)
-        private val pingButton: Button = itemView.findViewById(R.id.pingButton)
-        private val deleteButton: Button = itemView.findViewById(R.id.deleteButton)
+        private val statusChip: Chip = itemView.findViewById(R.id.pcStatusChip)
+        private val wakeButton: MaterialButton = itemView.findViewById(R.id.wakeButton)
+        private val pingButton: MaterialButton = itemView.findViewById(R.id.pingButton)
+        private val deleteButton: MaterialButton = itemView.findViewById(R.id.deleteButton)
 
         fun bind(pc: RemotePc) {
             root.setOnClickListener { onEdit(pc) }
@@ -45,17 +45,18 @@ class RemotePcAdapter(
             macText.text = pc.macAddress
             ipText.text = pc.ipAddress
             broadcastText.text = pc.broadcastAddress
-            statusText.text = when (pc.connectionState) {
-                ConnectionState.Online -> "온라인"
-                ConnectionState.Offline -> "오프라인"
-                ConnectionState.Unknown -> "대기"
-            }
             val color = when (pc.connectionState) {
                 ConnectionState.Online -> R.color.state_online
                 ConnectionState.Offline -> R.color.state_offline
                 ConnectionState.Unknown -> R.color.state_unknown
             }
-            statusDot.setColorFilter(ContextCompat.getColor(itemView.context, color))
+            statusChip.text = when (pc.connectionState) {
+                ConnectionState.Online -> "온라인"
+                ConnectionState.Offline -> "오프라인"
+                ConnectionState.Unknown -> "대기"
+            }
+            val resolvedColor = ContextCompat.getColor(itemView.context, color)
+            statusChip.chipBackgroundColor = ColorStateList.valueOf(resolvedColor)
             wakeButton.setOnClickListener { onWake(pc) }
             pingButton.setOnClickListener { onPing(pc) }
             deleteButton.setOnClickListener { onDelete(pc) }
@@ -67,4 +68,3 @@ class RemotePcAdapter(
         override fun areContentsTheSame(oldItem: RemotePc, newItem: RemotePc): Boolean = oldItem == newItem
     }
 }
-
