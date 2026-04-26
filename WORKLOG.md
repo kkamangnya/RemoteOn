@@ -4,3 +4,4 @@
 - 2026-04-26 21:56:46 +09:00 - Installed the Android SDK and Gradle in this workspace, then successfully ran `assembleDebug` for the RemoteOn app.
 - 2026-04-26 22:18:03 +09:00 - Shortened the Android install APK path by copying the debug build to `app/build/outputs/install/RemoteOn.apk` and updated the build script to match.
 - 2026-04-26 22:23:11 +09:00 - Removed the long-lived debug APK and build log artifacts after copying the install APK so only `app/build/outputs/install/RemoteOn.apk` remains.
+- 2026-04-26 22:25:21 +09:00 - Removed the leftover `app/build/outputs/apk` folder as part of the build cleanup so the workspace keeps only `app/build/outputs/install/RemoteOn.apk`.

@@ -45,7 +45,7 @@ tasks.register('copyDebugApk', Copy) {
 }
 
 tasks.register('cleanDebugApkArtifacts', Delete) {
-    delete("$buildDir/outputs/apk/debug")
+    delete("$buildDir/outputs/apk")
     delete("$buildDir/outputs/logs")
 }
 
